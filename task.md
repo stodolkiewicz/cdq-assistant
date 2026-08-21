@@ -7,6 +7,7 @@ Provide a chat interface
 - Local Vector database pgvector/pgvector:pg17 populated with CDQ
 Product information (RAG, convert to vector embeddings, take plain text
 from here https://www.cdq.com/products/cdq-fraud-guard)
+
 - Remote free REST Service ("https://restcountries.com/) → write own mcp server
 
 - Local free MCP server (https://mcpservers.org/servers/semdin/mcp-
