@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ChatController {
 
-	private static final String DEFAULT_CONVERSATION_ID = "1";
-
 	private final ChatClient chatClient;
 
 	public ChatController(ChatClient chatClient) {
@@ -20,11 +18,11 @@ public class ChatController {
 
 	@GetMapping("/api/chat")
 	public String chat(@RequestParam String message,
-			@RequestHeader(name = "X-Conversation-Id", required = false) String conversationId) {
-		String resolvedConversationId = conversationId != null ? conversationId : DEFAULT_CONVERSATION_ID;
+			@RequestHeader(name = "X-Conversation-Id",
+					defaultValue = "${app.chat.memory.default-conversation-id}") String conversationId) {
 		return chatClient.prompt()
 				.user(message)
-				.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, resolvedConversationId))
+				.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
 				.call()
 				.content();
 	}

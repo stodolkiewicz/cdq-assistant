@@ -45,3 +45,5 @@ app:
     memory:
       # number of messages kept in the in-memory chat window before the oldest are dropped
       max-messages: 5
+      # conversation id used when the client doesn't send one
+      default-conversation-id: "1"

@@ -14,3 +14,4 @@ This is a recruitment task — see [task.md](task.md) for the full spec.
 - Follow SOLID principles.
 - Always separate the data access layer (e.g. `JdbcTemplate`/SQL) into its own repository class — never mix it into a service.
 - Tunable/config-like values (window sizes, limits, thresholds) go in `application.yml`, not hardcoded as Java constants — read them via `@ConfigurationProperties` or `@Value`, whichever fits. This doesn't apply to fixed test values (see Tests section above).
+- Never put logic in controllers (no null-checks, fallbacks, branching, etc.). Controllers only translate HTTP <-> calls to services/beans; resolve defaults and business rules elsewhere (config classes, services) and have Spring inject the result.
