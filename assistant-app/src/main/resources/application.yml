@@ -24,3 +24,19 @@ spring:
         dimensions: 768
         distance-type: COSINE_DISTANCE
         index-type: HNSW
+
+app:
+  rag:
+    chunking:
+      # TokenTextSplitter — caps any oversized section to this many tokens
+      max-chunk-size: 800
+      # chunks shorter than this (in characters) get merged into a neighbor
+      min-chunk-size-chars: 350
+      # chunks shorter than this (in characters) are discarded, not embedded
+      min-chunk-length-to-embed: 5
+      # hard cap on the number of chunks produced from a single document
+      max-num-chunks: 10000
+      # MarkdownDocumentReader — splits by document structure before token-capping
+      markdown-reader:
+        # if true, a "---" horizontal rule starts a new section/chunk
+        horizontal-rule-create-document: false
