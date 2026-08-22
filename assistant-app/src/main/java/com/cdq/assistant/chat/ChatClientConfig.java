@@ -25,9 +25,10 @@ public class ChatClientConfig {
 	}
 
 	@Bean
-	ChatClient chatClient(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory) {
+	ChatClient chatClient(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, ChatTools chatTools) {
 		return chatClientBuilder
 				.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+				.defaultTools(chatTools)
 				.build();
 	}
 
