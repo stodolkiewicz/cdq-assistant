@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -16,11 +15,11 @@ import org.springframework.util.Assert;
 public class VectorStoreService {
 
 	private final VectorStore vectorStore;
-	private final JdbcTemplate jdbcTemplate;
+	private final VectorStoreRepository vectorStoreRepository;
 
-	public VectorStoreService(VectorStore vectorStore, JdbcTemplate jdbcTemplate) {
+	public VectorStoreService(VectorStore vectorStore, VectorStoreRepository vectorStoreRepository) {
 		this.vectorStore = vectorStore;
-		this.jdbcTemplate = jdbcTemplate;
+		this.vectorStoreRepository = vectorStoreRepository;
 	}
 
 	/**
@@ -47,8 +46,7 @@ public class VectorStoreService {
 	 * Checks whether the vector store has no documents in it.
 	 */
 	public boolean isEmpty() {
-		Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Long.class);
-		return count == null || count == 0;
+		return vectorStoreRepository.isEmpty();
 	}
 
 }

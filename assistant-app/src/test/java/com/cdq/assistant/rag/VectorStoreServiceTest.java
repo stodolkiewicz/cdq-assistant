@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -27,7 +26,7 @@ class VectorStoreServiceTest {
 	private VectorStore vectorStore;
 
 	@Mock
-	private JdbcTemplate jdbcTemplate;
+	private VectorStoreRepository vectorStoreRepository;
 
 	@Captor
 	private ArgumentCaptor<SearchRequest> searchRequestCaptor;
@@ -36,7 +35,7 @@ class VectorStoreServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		service = new VectorStoreService(vectorStore, jdbcTemplate);
+		service = new VectorStoreService(vectorStore, vectorStoreRepository);
 	}
 
 	@Test
@@ -91,15 +90,15 @@ class VectorStoreServiceTest {
 	}
 
 	@Test
-	void isEmptyReturnsTrueWhenTheTableHasNoRows() {
-		when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Long.class)).thenReturn(0L);
+	void isEmptyDelegatesToTheRepository() {
+		when(vectorStoreRepository.isEmpty()).thenReturn(true);
 
 		assertThat(service.isEmpty()).isTrue();
 	}
 
 	@Test
-	void isEmptyReturnsFalseWhenTheTableHasRows() {
-		when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Long.class)).thenReturn(3L);
+	void isEmptyReturnsFalseWhenTheRepositoryReportsRows() {
+		when(vectorStoreRepository.isEmpty()).thenReturn(false);
 
 		assertThat(service.isEmpty()).isFalse();
 	}

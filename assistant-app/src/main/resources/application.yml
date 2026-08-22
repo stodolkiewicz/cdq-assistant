@@ -40,3 +40,8 @@ app:
       markdown-reader:
         # if true, a "---" horizontal rule starts a new section/chunk
         horizontal-rule-create-document: false
+
+  chat:
+    memory:
+      # number of messages kept in the in-memory chat window before the oldest are dropped
+      max-messages: 5
