@@ -14,18 +14,29 @@ import org.springframework.util.Assert;
  * Splits a markdown resource into chunks in two steps: {@link MarkdownDocumentReader}
  * first splits by document structure (headings become metadata, so sections aren't
  * cut mid-way), then {@link TokenTextSplitter} caps any oversized section to a
- * sensible token size. Single responsibility: producing chunks, not storing them —
- * see {@link VectorStoreService}.
+ * sensible token size. Both steps are configured via {@link ChunkingProperties}
+ * (see {@code app.rag.chunking} in application.yaml). Single responsibility:
+ * producing chunks, not storing them — see {@link VectorStoreService}.
  */
 @Service
 public class MarkdownChunkingService {
 
+	private static final String PARENT_DOCUMENT_ID_METADATA_KEY = "parent_document_id";
+
 	private final MarkdownDocumentReaderConfig readerConfig;
 	private final TokenTextSplitter splitter;
 
-	public MarkdownChunkingService() {
-		this.readerConfig = MarkdownDocumentReaderConfig.defaultConfig();
-		this.splitter = new TokenTextSplitter();
+	public MarkdownChunkingService(ChunkingProperties properties) {
+		ChunkingProperties.MarkdownReader markdownReader = properties.markdownReader();
+		this.readerConfig = MarkdownDocumentReaderConfig.builder()
+				.withHorizontalRuleCreateDocument(markdownReader.horizontalRuleCreateDocument())
+				.build();
+		this.splitter = TokenTextSplitter.builder()
+				.withChunkSize(properties.maxChunkSize())
+				.withMinChunkSizeChars(properties.minChunkSizeChars())
+				.withMinChunkLengthToEmbed(properties.minChunkLengthToEmbed())
+				.withMaxNumChunks(properties.maxNumChunks())
+				.build();
 	}
 
 	/**
@@ -37,7 +48,9 @@ public class MarkdownChunkingService {
 		Assert.notNull(resource, "resource must not be null");
 
 		List<Document> sections = new MarkdownDocumentReader(resource, readerConfig).get();
-		return splitter.apply(sections);
+		List<Document> chunks = splitter.apply(sections);
+		chunks.forEach(chunk -> chunk.getMetadata().remove(PARENT_DOCUMENT_ID_METADATA_KEY));
+		return chunks;
 	}
 
 }
