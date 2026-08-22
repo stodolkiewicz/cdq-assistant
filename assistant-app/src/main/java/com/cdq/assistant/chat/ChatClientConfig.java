@@ -27,9 +27,11 @@ public class ChatClientConfig {
 
 	@Bean
 	ChatClient chatClient(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory, ChatTools chatTools,
+			ChatToolCallLoggingAdvisor chatToolCallLoggingAdvisor,
 			@Value("${app.chat.memory.default-conversation-id}") String defaultConversationId) {
 		return chatClientBuilder
 				.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+				.defaultAdvisors(chatToolCallLoggingAdvisor)
 				.defaultAdvisors(a -> a.param(ChatMemory.CONVERSATION_ID, defaultConversationId))
 				.defaultTools(chatTools)
 				.build();
