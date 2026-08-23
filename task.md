@@ -83,3 +83,12 @@ Task requirements
 the tests
 • Using AI is explicitly allowed; explain how you used AI to fulfill the task
 • If you were not able to fulfill a task, then explain why
+
+## How I used AI
+
+I used Claude Code as a pair-programmer throughout the task — implementation, refactors,
+tests, debugging, and this README — working through it interactively rather than accepting
+a first draft. Project conventions (SOLID, code style, testing rules) were set once in the
+repo's `CLAUDE.md` so they applied consistently across the whole session. I also gave it an
+MCP server for live Spring documentation, so it could check current APIs instead of relying
+on training data alone.
