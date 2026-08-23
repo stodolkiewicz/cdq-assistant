@@ -37,6 +37,19 @@ spring:
             countries:
               url: http://localhost:8081
               endpoint: /api/mcp/country-info
+        stdio:
+          connections:
+            weather:
+              command: docker
+              args:
+                - run
+                - -i
+                - --rm
+                - -e
+                - WEATHER_API_KEY=${WEATHER_API_KEY}
+                - -e
+                - WEATHER_API_URL=https:/d/api.weatherapi.com/v1/current.json
+                - mcp-weather-local
 
 app:
   rag:

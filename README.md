@@ -1,48 +1,91 @@
 # CDQ Chat Assistant
 
+A chat API (Ollama `qwen3:4b`) that answers questions using three knowledge sources:
+
+- **`assistant-app`** — the chat API itself. RAG over CDQ product info, stored in pgvector.
+- **`mcp-server-countries`** — our own MCP server, in this repo, wrapping restcountries.com.
+- **`mcp-weather`** — a third-party MCP server (not ours), run from a Docker image, for weather data.
+
+`assistant-app` talks to both MCP servers as an MCP client, and to pgvector + Ollama
+(auto-started via Docker).
+
 ## Prerequisites
 
 - JDK 25
 - Docker (for pgvector and Ollama containers)
 - A restcountries.com API key (free tier, 1000 req/month) — sign up at
   https://restcountries.com/sign-up
+- A weatherapi.com API key (free tier) — sign up at https://www.weatherapi.com/signup.aspx
 
 ## Run
 
-Two independent Spring Boot processes — start both, `mcp-server-countries` first (the MCP
-client in `assistant-app` connects on startup and `assistant-app` may fail to start otherwise):
+Do these steps in order.
 
-1. `mcp-server-countries` (port `8081`) — MCP server exposing the `get-country-info` tool,
-   backed by restcountries.com. Requires a `COUNTRIES_API_KEY` env var set before starting:
+**1. Set two env vars** (the API keys from Prerequisites):
 
-   - IntelliJ: Run Configuration for the `mcp-server-countries` module → Environment
-     variables → `COUNTRIES_API_KEY=your-key`
-   - Shell (Linux/macOS): `export COUNTRIES_API_KEY=your-key`
-   - Shell (Windows PowerShell): `$env:COUNTRIES_API_KEY="your-key"`
+```
+export COUNTRIES_API_KEY=your-key
+export WEATHER_API_KEY=your-key
+```
 
-   ```
-   ./mvnw spring-boot:run -pl mcp-server-countries
-   ```
+IntelliJ instead: set both in each module's Run Configuration → Environment variables.
 
-2. `assistant-app` (port `8080`) — the chat orchestrator; auto-starts pgvector and Ollama via
-   `assistant-app/docker-compose.yml`, and connects to `mcp-server-countries` as an MCP client:
+**2. Build the weather MCP Docker image** (one-time):
 
-   ```
-   ./mvnw spring-boot:run -pl assistant-app
-   ```
+```
+docker build -t mcp-weather-local assistant-app/mcp-weather
+```
 
-3. Pull the required Ollama models (first run only):
+No need to run this image yourself — `assistant-app` starts it as a subprocess
+(`docker run -i --rm mcp-weather-local`) via the MCP `stdio` transport each time it
+connects (see `spring.ai.mcp.client.stdio.connections.weather` in `application.yml`).
 
-   ```
-   docker exec -it $(docker ps -qf ancestor=ollama/ollama) ollama pull qwen3:4b
-   docker exec -it $(docker ps -qf ancestor=ollama/ollama) ollama pull nomic-embed-text
-   ```
+**3. Start `mcp-server-countries`** (our own MCP server, port `8081`, wraps restcountries.com):
 
-4. Chat with the model:
+```
+./mvnw spring-boot:run -pl mcp-server-countries
+```
 
-   ```
-   curl "http://localhost:8080/api/chat?message=Hello"
-   ```
+**4. Start `assistant-app`** (port `8080`, the chat API — auto-starts pgvector + Ollama):
+
+```
+./mvnw spring-boot:run -pl assistant-app
+```
+
+**5. Pull the Ollama models** (one-time):
+
+```
+docker exec -it $(docker ps -qf ancestor=ollama/ollama) ollama pull qwen3:4b
+docker exec -it $(docker ps -qf ancestor=ollama/ollama) ollama pull nomic-embed-text
+```
+
+**6. Chat:**
+
+```
+curl "http://localhost:8080/api/chat?message=Hello"
+```
+
+## Tests
+
+Run from the repo root (where `./mvnw` and the root `pom.xml` live) — the reactor build
+covers both `assistant-app` and `mcp-server-countries`.
+
+**Unit tests** (`*Test.java`, no external dependencies needed):
+
+```
+./mvnw test
+```
+
+**Integration tests** (`*IT.java`, Testcontainers + the real stack):
+
+```
+./mvnw verify
+```
+
+Needs everything from [Run](#run) in place first: `COUNTRIES_API_KEY` and
+`WEATHER_API_KEY` set, the `mcp-weather-local` image built, `mcp-server-countries`
+running on port `8081`, and Ollama (with both models pulled) reachable at
+`localhost:11434`. Postgres/pgvector is spun up automatically via Testcontainers.
 
 ## Tech details
 
