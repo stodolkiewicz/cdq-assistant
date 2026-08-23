@@ -1,0 +1,25 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: mcp-server-countries
+
+  ai:
+    mcp:
+      server:
+        protocol: STATELESS
+        name: mcp-server-countries
+        version: 1.0.0
+        type: SYNC
+        instructions: "Provides country information (capital, region, population, currencies) backed by restcountries.com"
+        streamable-http:
+          mcp-endpoint: /api/mcp/country-info
+
+app:
+  restcountries:
+    base-url: https://api.restcountries.com/countries/v5
+    # v5 requires an API key (free tier: 1000 req/month) — see README for how to set this.
+    api-key: ${COUNTRIES_API_KEY}
+    # response_fields requested from the API, to keep responses small
+    fields: names.common,capitals.name,capitals.coordinates,region,population,currencies

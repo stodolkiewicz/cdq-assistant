@@ -1,5 +1,6 @@
 package com.cdq.assistant.chat;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 public class ChatController {
 
@@ -20,6 +22,7 @@ public class ChatController {
 	public String chat(@RequestParam String message,
 			@RequestHeader(name = "X-Conversation-Id",
 					defaultValue = "${app.chat.memory.default-conversation-id}") String conversationId) {
+		log.debug("Received chat message for conversation '{}': {}", conversationId, message);
 		return chatClient.prompt()
 				.user(message)
 				.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))

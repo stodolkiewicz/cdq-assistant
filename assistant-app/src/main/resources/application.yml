@@ -1,3 +1,7 @@
+logging:
+  level:
+    com.cdq.assistant: DEBUG
+
 spring:
   application:
     name: assistant
@@ -24,6 +28,15 @@ spring:
         dimensions: 768
         distance-type: COSINE_DISTANCE
         index-type: HNSW
+
+    mcp:
+      client:
+        type: SYNC
+        streamable-http:
+          connections:
+            countries:
+              url: http://localhost:8081
+              endpoint: /api/mcp/country-info
 
 app:
   rag:

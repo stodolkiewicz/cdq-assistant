@@ -8,6 +8,7 @@ This is a recruitment task — see [task.md](task.md) for the full spec.
 - Integration tests: `assistant-app/src/it/java` (`*IT.java`, Testcontainers), run via `./mvnw verify`.
 - Fixed test values go in `private static final` constants, UPPER_SNAKE_CASE, not inline string literals.
 - After finishing any code change, run the unit tests (`./mvnw test`) before considering the change done.
+- Never write a test for pure delegation (a method that just forwards its call/arguments to another bean with no logic of its own). Only test methods that actually do something (mapping, branching, validation, error handling, etc.).
 
 # Code style
 
