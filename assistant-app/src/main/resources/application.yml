@@ -48,7 +48,7 @@ spring:
                 - -e
                 - WEATHER_API_KEY=${WEATHER_API_KEY}
                 - -e
-                - WEATHER_API_URL=https:/d/api.weatherapi.com/v1/current.json
+                - WEATHER_API_URL=https://api.weatherapi.com/v1/current.json
                 - mcp-weather-local
 
 app:
